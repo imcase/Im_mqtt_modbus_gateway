@@ -16,6 +16,12 @@
 - [4. Modbus MQTT Gateway Console](#4-device-console)
   - [4.1 Home](#41-home)
   - [4.2 Settings](#42-settings)
+    - [4.2.1 General](#421-general)
+    - [4.2.2 Network](#422-network)
+    - [4.2.3 Modbus](#423-modbus)
+    - [4.2.4 MQTT](#424-mqtt)
+    - [4.2.5 Wi-Fi](#425-wi-fi)
+    - [4.2.6 Cellular](#426-cellular)
   - [4.3 Database](#43-database)
   - [Column reference](#column-reference)
   - [4.4 Log](#44-log)
@@ -162,34 +168,44 @@ MQTT connection.
 > - Restart the device after changing a setting.
 > - The new value takes effect after restart.
 
-<a id="421-info"></a>
-#### 4.2.1 Info [↑](#bookmarks "Back to Bookmarks")
+<a id="421-general"></a>
+#### 4.2.1 General [↑](#bookmarks "Back to Bookmarks")
 
-The `Info` group displays gateway information and configured table counts.
+In the **General** group, DHCP can be enabled or a static Ethernet IP address,
+netmask, and gateway can be configured.
 
-![Modbus MQTT Gateway Console Settings, Info group](https://raw.githubusercontent.com/imcase/Im_appblocks_snmp_modbus_gateway_assets/refs/heads/main/assets/snmp_modbus_gateway_webconsole_settings_info_rev2.png)
+![Modbus MQTT Gateway Console Settings, General tab](https://raw.githubusercontent.com/imcase/Im_mqtt_modbus_gateway/refs/heads/main/assets/mqtt_modbus_gateway_settings_general.png)
 
-<a id="422-config"></a>
-#### 4.2.2 Config [↑](#bookmarks "Back to Bookmarks")
 
-Use the `Config` group to set the **Polling Interval** and **Debugprint**.
+<a id="422-network"></a>
+#### 4.2.2 Network [↑](#bookmarks "Back to Bookmarks")
 
-> **NOTE:** The supported `Polling Interval` range is 0.1 to 60 seconds.
+Use **Network** to enable or disable Ethernet DHCP and configure the Ethernet
+IP address, netmask, and gateway.
 
-![Modbus MQTT Gateway Console Settings, Config group](https://raw.githubusercontent.com/imcase/Im_appblocks_snmp_modbus_gateway_assets/refs/heads/main/assets/snmp_modbus_gateway_webconsole_settings_config.png)
+<a id="423-modbus"></a>
+#### 4.2.3 Modbus [↑](#bookmarks "Back to Bookmarks")
 
-<a id="423-network"></a>
-#### 4.2.3 Network [↑](#bookmarks "Back to Bookmarks")
+Use **Modbus** to configure the serial baud rate, parity, data bits, and poll
+interval for the Modbus connection.
 
-The Network group lets you enable DHCP or configure a static Ethernet IP
-address, netmask, and gateway.
+<a id="424-mqtt"></a>
+#### 4.2.4 MQTT [↑](#bookmarks "Back to Bookmarks")
 
-> **NOTE:**
-> - When DHCP is enabled, the static Ethernet address fields are **Unavailable**.
-> - DHCP may assign a different IP address and interrupt your Modbus MQTT Gateway Console connection.
-> - To keep the device reachable at a known address, a **static** IP address is recommended.
+Use **MQTT** to configure the broker address and port, TLS, client identity
+and credentials, publish topic prefix, publish interval, and certificate files.
 
-![Modbus MQTT Gateway Console Settings, Network group](https://raw.githubusercontent.com/imcase/Im_appblocks_snmp_modbus_gateway_assets/refs/heads/main/assets/snmp_modbus_gateway_webconsole_settings_network.png)
+<a id="425-wi-fi"></a>
+#### 4.2.5 Wi-Fi [↑](#bookmarks "Back to Bookmarks")
+
+For Wi-Fi configurations, set the access point SSID, security type, password,
+and DHCP or static IP settings.
+
+<a id="426-cellular"></a>
+#### 4.2.6 Cellular [↑](#bookmarks "Back to Bookmarks")
+
+For cellular configurations, enter the carrier's Access Point Name (APN) and
+SIM Card Pin.
 
 <a id="43-database"></a>
 ### 4.3 Database [↑](#bookmarks "Back to Bookmarks")
