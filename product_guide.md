@@ -71,6 +71,8 @@ topic and the register name. The application definition includes Ethernet,
 Wi-Fi, and cellular variants; the supplied generated firmware is the Ethernet
 build.
 
+![Modbus MQTT Gateway overview: Modbus RTU field devices connect to the gateway, which publishes to an MQTT broker for client applications](modbus_mqtt_gateway_overview.png)
+
 <br><br>
 
 ---
