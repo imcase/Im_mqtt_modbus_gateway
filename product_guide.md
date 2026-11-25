@@ -29,28 +29,21 @@
     - [4.5.1 Reboot Device](#451-reboot-device)
     - [4.5.2 Initialize Settings](#452-initialize-settings)
 - [5. Deployment Example](#5-deployment-example)
-  - [5.1 Connect the Modbus BP#02 to the Gateway](#51-connect-the-modbus-bp02-to-the-gateway)
-  - [5.2 Connect the Network Cable and Power Adapter](#52-connect-the-network-cable-and-power-adapter)
-  - [5.3 Connect to the Device Console](#53-connect-to-the-device-console)
-  - [5.4 Configure Settings](#54-configure-settings)
-    - [5.4.1 Polling Interval](#541-polling-interval)
-    - [5.4.2 Network](#542-network)
-  - [5.5 Configure Modbus Mapping](#55-configure-modbus-mapping-in-table_devices_input)
-  - [5.6 Restart Device](#56-restart-device)
-  - [5.7 Verify Modbus Polled Data in `TABLE_DEVICES_OUTPUT`](#57-verify-modbus-polled-data-in-table_devices_output)
-  - [5.9 Write Data to Modbus](#59-write-data-to-modbus)
-    - [5.9.1 Read Current Value](#591-read-current-value)
-    - [5.9.2 Write New Value](#592-write-new-value)
-    - [5.9.5 Verify Written Data in the Device Console](#595-verify-written-data-in-the-device-console)
-    - [5.10.1 Review the Setting in `TABLE_SETTINGS`](#5101-review-the-setting-in-table_settings)
-      - [5.10.2.1 Disable DHCP](#51021-disable-dhcp)
-      - [5.10.2.2 Set the IP Address](#51022-set-the-ip-address)
-      - [5.10.2.3 Set the Subnet Mask](#51023-set-the-subnet-mask)
-      - [5.10.2.4 Set the Gateway Address](#51024-set-the-gateway-address)
-    - [5.10.4 Verify Written Settings in the Device Console](#5104-verify-written-settings-in-the-device-console)
-      - [5.10.5.1 Send 1st Reboot Signal](#51051-send-1st-reboot-signal)
-      - [5.10.5.2 Verify 1st Reboot Signal](#51052-verify-1st-reboot-signal)
-      - [5.10.5.3 Send 2nd Reboot Signal within 10 Seconds](#51053-send-2nd-reboot-signal-within-10-seconds)
+  - [5.1 Connect the Modbus RTU devices](#51-connect-the-modbus-rtu-devices)
+  - [5.2 Connect the network and power](#52-connect-the-network-and-power)
+  - [5.3 Connect to the Modbus MQTT Gateway Console](#53-connect-to-the-modbus-mqtt-gateway-console)
+    - [5.3.1 Settings](#531-settings)
+      - [5.3.1.1 General](#5311-general)
+      - [5.3.1.2 Network](#5312-network)
+      - [5.3.1.3 Modbus](#5313-modbus)
+    - [5.3.2 Database](#532-database)
+      - [5.3.2.1 Configure Modbus Mapping in `DEVICES`](#5321-configure-modbus-mapping-in-devices)
+      - [5.3.2.2 `REGISTER_VALUE`](#5322-register-value)
+    - [5.3.3 Reboot Device](#533-reboot-device)
+  - [5.4 EMQX](#54-emqx)
+  - [5.5 Check Result](#55-check-result)
+    - [5.5.1 Database: `REGISTER_VALUE`](#551-register-value)
+    - [5.5.2 MQTTX Web Client](#552-mqttx-web-client)
 - [6. Commissioning checklist](#6-commissioning-checklist)
 - [7. Troubleshooting](#7-troubleshooting)
 
@@ -71,7 +64,7 @@ topic and the register name. The application definition includes Ethernet,
 Wi-Fi, and cellular variants; the supplied generated firmware is the Ethernet
 build.
 
-![Modbus MQTT Gateway overview: Modbus RTU field devices connect to the gateway, which publishes to an MQTT broker for client applications](modbus_mqtt_gateway_overview.png)
+![Modbus MQTT Gateway overview: Modbus RTU field devices connect to the gateway, which publishes to an MQTT broker for client applications](https://raw.githubusercontent.com/imcase/Im_mqtt_modbus_gateway/refs/heads/main/assets/modbus_mqtt_gateway_overview.png)
 
 <br><br>
 
@@ -85,8 +78,8 @@ build.
 | Controller | Tibbo TPP2W(G3) Tibbo Project PCB |
 | Enclosure | TPB2, DIN-rail mounting kit, vibration-proof kit |
 | Network | On-board 10/100 Base-T Ethernet with RJ45 |
-| Wi-Fi **(Optional)** | Requires the Wi-Fi module |
-| Cellular **(Optional)** | Requires the cellular modem module and antenna |
+| Wi-Fi (Optional) | Requires the Wi-Fi module |
+| Cellular (Optional) | Requires the cellular modem module and antenna |
 | Field interface | Tibbit #45 RS-485 interface for Modbus RTU, installed in socket 9 |
 | Field connector | Tibbit #21 (4-terminal block), installed in socket 2 |
 | Power | Tibbit #10 power supply module in socket 11 |
@@ -173,8 +166,7 @@ MQTT connection.
 <a id="421-general"></a>
 #### 4.2.1 General [↑](#bookmarks "Back to Bookmarks")
 
-In the **General** group, DHCP can be enabled or a static Ethernet IP address,
-netmask, and gateway can be configured.
+The **General** tab contains the Web Admin Password and Device Time Zone settings, which are configurable.
 
 ![Modbus MQTT Gateway Console Settings, General tab](https://raw.githubusercontent.com/imcase/Im_mqtt_modbus_gateway/refs/heads/main/assets/mqtt_modbus_gateway_settings_general.png)
 
@@ -302,541 +294,95 @@ Click **Initialize Settings** to restore the device's default configuration.
 <a id="5-deployment-example"></a>
 ## 5. Deployment Example [↑](#bookmarks "Back to Bookmarks")
 
-This example shows how to connect a Modbus device to the gateway, configure a
-Modbus value for polling, and read it through an SNMP monitoring system using
-`snmpwalk`.
+This example covers configuring the gateway, mapping Modbus registers, connecting to an MQTT broker, and checking the published values.
 
-It also demonstrates how an authorized SNMP client can use `snmpset` to write
-a Modbus value and change a device setting.
+<a id="51-connect-the-modbus-rtu-devices"></a>
+### 5.1 Connect the Modbus RTU devices [↑](#bookmarks "Back to Bookmarks")
 
-<br>
+Connect the Modbus RTU field devices to the gateway's RS-485 interface. Follow
+the wiring and termination requirements in each field device's documentation.
 
-<a id="51-connect-the-modbus-bp02-to-the-gateway"></a>
-### 5.1 Connect the Modbus BP#02 to the Gateway [↑](#bookmarks "Back to Bookmarks")
+<a id="52-connect-the-network-and-power"></a>
+### 5.2 Connect the network and power [↑](#bookmarks "Back to Bookmarks")
 
-The deployment steps use a Tibbo Modbus BP#02, a sensor for ambient temperature
-and relative humidity. The BP#02 is only used as an example; you can connect
-another compatible Modbus device instead.
+Connect the gateway to the network using Ethernet, or the optional Wi-Fi or
+cellular configuration. Connect the power adapter and wait for the gateway to
+finish starting.
 
-> **IMPORTANT:** Before replacing a Modbus sensor or changing its wiring,
-> disconnect power from the device. Reconnect power only after the new sensor
-> and all wiring have been connected correctly.
+<a id="53-connect-to-the-modbus-mqtt-gateway-console"></a>
+### 5.3 Connect to the Modbus MQTT Gateway Console [↑](#bookmarks "Back to Bookmarks")
 
-Connect the BP#02 to the TPP2W(G2) as shown below. Connect each wire to the
-terminal with the matching label: `VCC` to `VCC`, `GND` to `GND`, `Tx` to
-`Tx`, and `Rx` to `Rx`. When using a different Modbus device, follow its
-documentation for the required power and communication connections.
+Open the gateway's IP address in a web browser to access the Modbus MQTT Gateway
+Console.
 
-> **TIP:** More Tibbo RS-485 Modbus sensor models are available [here](https://tibbo.com/store/rs485-modbus-sensors.html).
+<a id="531-settings"></a>
+#### 5.3.1 Settings [↑](#bookmarks "Back to Bookmarks")
 
-![Connecting the BP#02 sensor to the TPP2W(G2)](https://raw.githubusercontent.com/imcase/Im_appblocks_snmp_modbus_gateway_assets/refs/heads/main/assets/tpp2wg2_modbus_rev2.png)
+Configure the settings required for the installation, then select **Save**.
 
-<br>
+<a id="5311-general"></a>
+##### 5.3.1.1 General [↑](#bookmarks "Back to Bookmarks")
 
-<a id="52-connect-the-network-cable-and-power-adapter"></a>
-### 5.2 Connect the Network Cable and Power Adapter [↑](#bookmarks "Back to Bookmarks")
+Set the Web Admin Password and Device Time Zone as needed.
 
-Connect an Ethernet cable from the device's RJ45 port to your local network.
-Then connect the supplied power adapter to the device. The device starts when
-power is connected. Allow up to 20 seconds for the device to fully boot and
-become ready for use.
+<a id="5312-network"></a>
+##### 5.3.1.2 Network [↑](#bookmarks "Back to Bookmarks")
 
-![Connecting the Ethernet cable and power adapter to the TPP2W(G2)](https://raw.githubusercontent.com/imcase/Im_appblocks_snmp_modbus_gateway_assets/refs/heads/main/assets/tpp2wg2_ethernet_power_rev2.png)
+Configure Ethernet DHCP or enter the static IP address, netmask, and gateway for the installation. If the IP address changes, reconnect to the Modbus MQTT Gateway Console using the new address.
 
-<a id="53-connect-to-the-device-console"></a>
-### 5.3 Connect to the Device Console [↑](#bookmarks "Back to Bookmarks")
+<a id="5313-modbus"></a>
+##### 5.3.1.3 Modbus [↑](#bookmarks "Back to Bookmarks")
 
-Using your preferred web browser, navigate to [http://192.168.1.40](http://192.168.1.40). Shortly after, the **Home** page should be displayed.
+Set the serial **baud rate**, **parity**, **data bits**, and **poll interval** to match the connected Modbus device.
 
-![Device Console, Home area](https://raw.githubusercontent.com/imcase/Im_appblocks_snmp_modbus_gateway_assets/refs/heads/main/assets/snmp_modbus_gateway_webconsole_home_rev2.png)
+> **Reminder:**
+> - The baud rate and other serial communication settings must match the field device configuration
+> - Mismatched settings can prevent communication.
 
-<br>
+<a id="532-database"></a>
+#### 5.3.2 Database [↑](#bookmarks "Back to Bookmarks")
 
-<a id="54-configure-settings"></a>
-### 5.4 Configure Settings [↑](#bookmarks "Back to Bookmarks")
+<a id="5321-configure-modbus-mapping-in-devices"></a>
+##### 5.3.2.1 Configure Modbus Mapping in `DEVICES` [↑](#bookmarks "Back to Bookmarks")
 
-Open **Settings** in the Device Console. Review the network, SNMP, and polling
-settings required for your installation. Restart the device after making any
-changes so that the new settings are applied.
+In **Database**, add a row to `DEVICES` for each Modbus point. Enter the device ID, register address, function code, multiplier, and register name according to the field device register map.
 
-> For an overview of the available settings, see [Section 4.2, Settings](#42-settings).
+<a id="5322-register-value"></a>
+##### 5.3.2.2 `REGISTER_VALUE` [↑](#bookmarks "Back to Bookmarks")
 
-<a id="541-polling-interval"></a>
-#### 5.4.1 Polling Interval [↑](#bookmarks "Back to Bookmarks")
+`REGISTER_VALUE` displays values polled from the configured Modbus points. The verification steps for these values are covered later in this guide.
 
-Set the **Polling Interval** in the **Config** group to a value that suits your
-application. This setting determines how often the gateway reads values from
-the connected Modbus device.
+<a id="533-reboot-device"></a>
+#### 5.3.3 Reboot Device [↑](#bookmarks "Back to Bookmarks")
 
-<a id="542-network"></a>
-#### 5.4.2 Network [↑](#bookmarks "Back to Bookmarks")
+Reboot the gateway to apply the saved Modbus configuration. Wait for it to return online before continuing.
 
-Choose the network method required by your installation in the **Network**
-group:
+<a id="54-emqx"></a>
+### 5.4 EMQX [↑](#bookmarks "Back to Bookmarks")
 
-- Enable **DHCP** if your network automatically assigns IP addresses.
-- Leave **DHCP** disabled to use a static IP address, then enter the IP address,
-  netmask, and gateway supplied by your network administrator.
+Configure the MQTT connection for the EMQX broker. Detailed broker setup steps will be added here.
 
-> This guide uses `192.168.1.40` throughout the example.
+<!-- TODO: Use docs/mqtt_broker_howto.md as the reference when writing the EMQX setup subsections. -->
 
+<a id="55-check-result"></a>
+### 5.5 Check Result [↑](#bookmarks "Back to Bookmarks")
 
-After changing the network settings and restarting the device, reconnect to
-the Device Console using its new IP address.
+<a id="551-register-value"></a>
+#### 5.5.1 Database: `REGISTER_VALUE` [↑](#bookmarks "Back to Bookmarks")
 
-<a id="543-snmp"></a>
-#### 5.4.3 SNMP [↑](#bookmarks "Back to Bookmarks")
+Check that `REGISTER_VALUE` contains the expected polled values.
 
-Configure the SNMP port and access credentials required by your monitoring
-system in the **SNMP** group. Configure either SNMPv2c community strings or
-SNMPv3 user and security settings, as required by your organization.
+<a id="552-mqttx-web-client"></a>
+#### 5.5.2 MQTTX Web Client [↑](#bookmarks "Back to Bookmarks")
 
-Enable write access only when it is required for approved control points. Use
-credentials and security settings approved by your organization.
-
-> This guide uses the default SNMP settings throughout the example.
-
-<br>
-
-<a id="55-configure-modbus-mapping-in-table_devices_input"></a>
-### 5.5 Configure Modbus Mapping in `TABLE_DEVICES_INPUT` [↑](#bookmarks "Back to Bookmarks")
-
-Open **Database** in the Device Console. In `TABLE_DEVICES_INPUT`, add a
-mapping for each Modbus value that you want to make available through SNMP.
-
-> **NOTE:**
-> - Enter the `DEVICE_ID`, `REG_ADDR`, and `FUNC_CODE` exactly as specified in
->   the connected field device's Modbus register map or datasheet.
-> - Each `OID_COLUMN` value must be **UNIQUE**. For details, see
->   [Section 4.2.4.1, Scalar Instance Object-ID](#4241-scalar-instance-object-id).
-> - `TABLE_DEVICES_INPUT` supports a maximum of **30** mappings.
-> - `OID_COLUMN = 207` is used later in this guide to demonstrate **Write Data
->   to Modbus**.
-
-<br>
-
-![Device Console Database, TABLE_DEVICES_INPUT](https://raw.githubusercontent.com/imcase/Im_appblocks_snmp_modbus_gateway_assets/refs/heads/main/assets/snmp_modbus_gateway_webconsole_database_table_devices_input.png)
-
-<br>
-
-<a id="56-restart-device"></a>
-### 5.6 Restart Device [↑](#bookmarks "Back to Bookmarks")
-
-Restart the device so that the new configuration is applied. Allow up to 20
-seconds for the device to fully boot and become ready for use.
-
-> **NOTE:** For details about restarting the device, see
->  [4.4.1 Reboot Device](#441-reboot-device).
-
-<br>
-
-<a id="57-verify-modbus-polled-data-in-table_devices_output"></a>
-### 5.7 Verify Modbus Polled Data in `TABLE_DEVICES_OUTPUT` [↑](#bookmarks "Back to Bookmarks")
-
-In **Database**, select `TABLE_DEVICES_OUTPUT`. Confirm that the mapping
-configured in `TABLE_DEVICES_INPUT` appears in this table and that its `VALUE`
-field shows the expected value read from the Modbus device.
-
-The `TABLE_DEVICES_OUTPUT` is a live view of the gateway's polling
-results, updated at the configured polling interval.
-
-> **NOTE:**
-> - If the expected mapping or value is **not** shown, check the Modbus wiring.
-> - Also check the `DEVICE_ID`, `REG_ADDR`, `FUNC_CODE`, and `OID_COLUMN` configured in
->   `TABLE_DEVICES_INPUT`.
-> - You can ignore the `HASH_ID`, since it is an internal identifier used by
->   the gateway.
-> - Click **Refresh** to update the displayed table data.
-
-![Device Console Database, TABLE_DEVICES_OUTPUT](https://raw.githubusercontent.com/imcase/Im_appblocks_snmp_modbus_gateway_assets/refs/heads/main/assets/snmp_modbus_gateway_webconsole_database_table_devices_output.png)
-
-
-
-<br>
-
-<a id="58-verify-modbus-polled-data-via-snmp"></a>
-### 5.8 Verify Modbus Polled Data via SNMP [↑](#bookmarks "Back to Bookmarks")
-
-This example uses a Linux computer and SNMPv2c to read the Modbus value
-published by the gateway. The SNMP settings used below are configured in
-[Section 4.2.4, SNMP](#424-snmp).
-
-Use `snmpwalk` to view **ALL** SNMP values available under the gateway's
-`SysObjectID`.
-
-```text
-snmpwalk -v2c -c <read-community> <device-ip> <SysObjectID>
-```
-
-For this example, use the configured read community, device IP address, and
-`SysObjectID`:
-
-```bash
-snmpwalk -v2c -c public 192.168.1.40 1.3.6.1.4.1.20738.45.46
-```
-
-![Linux terminal, SNMP walk example](https://raw.githubusercontent.com/imcase/Im_appblocks_snmp_modbus_gateway_assets/refs/heads/main/assets/snmp_modbus_gateway_snmpwalk_example.png)
-
-The command displays the available SNMP values and their full OIDs. Locate the
-value with `OID_COLUMN` `401` in the command output.
-
-Use `snmpget` to read one specific value. The full scalar OID has the following
-format:
-
-```text
-<SysObjectID>.1.<OID_COLUMN>.0
-```
-
-Use the following command to read the value with `OID_COLUMN` `401`:
-
-```bash
-snmpget -v2c -c public 192.168.1.40 1.3.6.1.4.1.20738.45.46.1.401.0
-```
-
-![Linux terminal, SNMP get example](https://raw.githubusercontent.com/imcase/Im_appblocks_snmp_modbus_gateway_assets/refs/heads/main/assets/snmp_modbus_gateway_snmpget_example.png)
-
-> **NOTE:**
-> - Replace `public`, `192.168.1.40`, and `1.3.6.1.4.1.20738.45.46` when
->   the corresponding settings of your device are different.
-> - SNMPv3 can also be used. Use the username, authentication settings, and
->   privacy settings configured in the Device Console. The general command
->   format is:
->
->   ```text
->   snmpwalk -v3 -l authPriv -u <username> -a <auth-protocol> \
->     -A <authentication-password> -x <privacy-protocol> \
->     -X <privacy-password> <device-ip> <SysObjectID>
->   ```
->
->   ```text
->   snmpget -v3 -l authPriv -u <username> -a <auth-protocol> \
->     -A <authentication-password> -x <privacy-protocol> \
->     -X <privacy-password> <device-ip> <SysObjectID>.1.<OID_COLUMN>.0
->   ```
->
-> - Other SNMP tools can be used instead of the Linux command line. For
->   example, Windows users can use Paessler SNMP Tester.
-
-
-
-<br>
-
-<a id="59-write-data-to-modbus"></a>
-### 5.9 Write Data to Modbus [↑](#bookmarks "Back to Bookmarks")
-
-This section shows how an authorized SNMP client can write a value to a Modbus
-register through the gateway. In this example, `OID_COLUMN 207` identifies the
-configured Modbus write mapping. The SNMP settings used below are configured in
-[Section 4.2.4, SNMP](#424-snmp).
-
-> **NOTE:**
-> - The SNMP write command sends the requested value to the connected Modbus
->   device.
-> - Use this function only for approved control points and only when it is safe
->   to change the value on the field device.
-
-<a id="591-read-current-value"></a>
-#### 5.9.1 Read Current Value [↑](#bookmarks "Back to Bookmarks")
-
-Before writing a new value, use `snmpget` to read the current value of the
-mapping with `OID_COLUMN` set to `207`.
-
-```bash
-snmpget -v2c -c public 192.168.1.40 1.3.6.1.4.1.20738.45.46.1.207.0
-```
-
-![Linux terminal, SNMP get OID 207 before write](https://raw.githubusercontent.com/imcase/Im_appblocks_snmp_modbus_gateway_assets/refs/heads/main/assets/snmp_modbus_gateway_snmpget_oid_207_before_write_example.png)
-
-> The current value will be used later to compare with the newly written value.
-
-<a id="592-write-new-value"></a>
-#### 5.9.2 Write New Value [↑](#bookmarks "Back to Bookmarks")
-
-Use the following command to write the value `4546` to `OID_COLUMN` `207`:
-
-```bash
-snmpset -v2c -c private 192.168.1.40 1.3.6.1.4.1.20738.45.46.1.207.0 i 4546
-```
-
-![Linux terminal, SNMP set OID 207](https://raw.githubusercontent.com/imcase/Im_appblocks_snmp_modbus_gateway_assets/refs/heads/main/assets/snmp_modbus_gateway_snmpset_oid_207_write_example.png)
-
-> The command sends the value to the connected Modbus device.
-
-<a id="593-verify-snmp-write-response"></a>
-#### 5.9.3 Verify SNMP Write Response [↑](#bookmarks "Back to Bookmarks")
-
-The gateway also provides a confirmation of the most recent SNMP write through
-`OID_COLUMN` `65534`. Run the following command immediately after the write:
-
-```bash
-snmpget -v2c -c public 192.168.1.40 1.3.6.1.4.1.20738.45.46.1.65534.0
-```
-
-![Linux terminal, SNMP get OID 65534 after write](https://raw.githubusercontent.com/imcase/Im_appblocks_snmp_modbus_gateway_assets/refs/heads/main/assets/snmp_modbus_gateway_snmpget_oid_65534_after_write_example.png)
-
-Confirm that the returned response shows `SUCCESS`.
-
-> **NOTE:**
-> - The SNMP write response shows whether the most recent `snmpset` command
->   succeeded (`SUCCESS`) or failed.
-> - The response remains available for 30 seconds, then resets to `IDLE`.
-> - If the most recent `snmpset` command **failed**, follow the hint shown in the
->   response and check the Modbus wiring and configuration before trying again.
-
-<a id="594-verify-written-data-via-snmpget"></a>
-#### 5.9.4 Verify Written Data via SNMPGET [↑](#bookmarks "Back to Bookmarks")
-
-Use `snmpget` to confirm the written value through SNMP:
-
-```bash
-snmpget -v2c -c public 192.168.1.40 1.3.6.1.4.1.20738.45.46.1.207.0
-```
-
-![Linux terminal, SNMP get OID 207 after write](https://raw.githubusercontent.com/imcase/Im_appblocks_snmp_modbus_gateway_assets/refs/heads/main/assets/snmp_modbus_gateway_snmpget_oid_207_after_write_example.png)
-
-Confirm that the returned value is `4546`.
-
-<a id="595-verify-written-data-in-the-device-console"></a>
-#### 5.9.5 Verify Written Data in the Device Console [↑](#bookmarks "Back to Bookmarks")
-
-Wait for at least one polling interval after sending the `snmpset` command.
-Then open **Database** in the Device Console and select
-`TABLE_DEVICES_OUTPUT`. Confirm that the entry with `OID_COLUMN` `207` shows
-the new `VALUE` of `4546`.
-
-![Device Console Database, TABLE_DEVICES_OUTPUT OID 207](https://raw.githubusercontent.com/imcase/Im_appblocks_snmp_modbus_gateway_assets/refs/heads/main/assets/snmp_modbus_gateway_webconsole_database_table_devices_output_oid_207.png)
-
-> **NOTE:**
-> - `TABLE_DEVICES_OUTPUT` is READ-ONLY and does not update automatically.
->   Click **Refresh** to update the displayed data.
-> - Modbus writes take effect immediately. Restarting the device is therefore
->   NOT necessary.
-
-<br>
-
-<a id="510-change-settings-via-snmp"></a>
-### 5.10 Change Settings via SNMP [↑](#bookmarks "Back to Bookmarks")
-
-Authorized SNMP clients can change device settings. Each setting is identified
-in `TABLE_SETTINGS` by its `OID_COLUMN`.
-
-> **NOTE:**
-> - Changing network or SNMP settings **can interrupt your connection** to the device.
-> - A changed device setting is **NOT** applied until the device restarts.
-
-<a id="5101-review-the-setting-in-table_settings"></a>
-#### 5.10.1 Review the Setting in `TABLE_SETTINGS` [↑](#bookmarks "Back to Bookmarks")
-
-In **Database**, select `TABLE_SETTINGS`. Locate the setting you want to change
-and note its `OID_COLUMN`.
-
-> **NOTE:**
-> - `TABLE_SETTINGS` is read-only.
-> - Device settings can be changed through the Device Console or SNMP.
-
-
-<a id="5102-write-network-settings-using-snmp"></a>
-#### 5.10.2 Write Network Settings Using SNMP [↑](#bookmarks "Back to Bookmarks")
-
-Most installations use a static IP address that matches the local network. For
-example, configure the device with the following settings:
-
-- `NET_DHCP` to `disabled`
-- `NET_IP` to `192.168.1.121`
-- `NET_MASK` to `255.255.255.0`
-- `NET_GATEWAY` to `192.168.1.1`
-
-The marked rows below identify these settings and their `OID_COLUMN` values.
-
-![Device Console Database, TABLE_SETTINGS network settings](https://raw.githubusercontent.com/imcase/Im_appblocks_snmp_modbus_gateway_assets/refs/heads/main/assets/snmp_modbus_gateway_webconsole_database_table_settings_network.png)
-
-Send the following commands one at a time. The commands use the device's
-current IP address, `192.168.1.40`.
-
-> After each `snmpset` command, run the response command within 30 seconds to confirm that the write succeeded.
-
-<a id="51021-disable-dhcp"></a>
-##### 5.10.2.1 Disable DHCP [↑](#bookmarks "Back to Bookmarks")
-
-Disable DHCP:
-
-```bash
-snmpset -v2c -c private 192.168.1.40 1.3.6.1.4.1.20738.45.46.1.65503.0 s disabled
-```
-
-![Linux terminal, SNMP set NET_DHCP](https://raw.githubusercontent.com/imcase/Im_appblocks_snmp_modbus_gateway_assets/refs/heads/main/assets/snmp_modbus_gateway_snmpset_netdhcp_example.png)
-
-Immediately verify the response:
-
-```bash
-snmpget -v2c -c public 192.168.1.40 1.3.6.1.4.1.20738.45.46.1.65534.0
-```
-
-![Linux terminal, SNMP response after setting NET_DHCP](https://raw.githubusercontent.com/imcase/Im_appblocks_snmp_modbus_gateway_assets/refs/heads/main/assets/snmp_modbus_gateway_snmpget_netdhcp_response_example.png)
-
-Confirm that the returned response shows `SUCCESS`.
-
-<a id="51022-set-the-ip-address"></a>
-##### 5.10.2.2 Set the IP Address [↑](#bookmarks "Back to Bookmarks")
-
-Set the device IP address:
-
-```bash
-snmpset -v2c -c private 192.168.1.40 1.3.6.1.4.1.20738.45.46.1.65505.0 s 192.168.1.121
-```
-
-![Linux terminal, SNMP set NET_IP](https://raw.githubusercontent.com/imcase/Im_appblocks_snmp_modbus_gateway_assets/refs/heads/main/assets/snmp_modbus_gateway_snmpset_netip_example.png)
-
-Immediately verify the response:
-
-```bash
-snmpget -v2c -c public 192.168.1.40 1.3.6.1.4.1.20738.45.46.1.65534.0
-```
-
-![Linux terminal, SNMP response after setting NET_IP](https://raw.githubusercontent.com/imcase/Im_appblocks_snmp_modbus_gateway_assets/refs/heads/main/assets/snmp_modbus_gateway_snmpget_netip_response_example.png)
-
-Confirm that the returned response shows `SUCCESS`.
-
-<a id="51023-set-the-subnet-mask"></a>
-##### 5.10.2.3 Set the Subnet Mask [↑](#bookmarks "Back to Bookmarks")
-
-Set the subnet mask:
-
-```bash
-snmpset -v2c -c private 192.168.1.40 1.3.6.1.4.1.20738.45.46.1.65506.0 s 255.255.255.0
-```
-
-![Linux terminal, SNMP set NET_MASK](https://raw.githubusercontent.com/imcase/Im_appblocks_snmp_modbus_gateway_assets/refs/heads/main/assets/snmp_modbus_gateway_snmpset_netmask_example.png)
-
-Immediately verify the response:
-
-```bash
-snmpget -v2c -c public 192.168.1.40 1.3.6.1.4.1.20738.45.46.1.65534.0
-```
-
-![Linux terminal, SNMP response after setting NET_MASK](https://raw.githubusercontent.com/imcase/Im_appblocks_snmp_modbus_gateway_assets/refs/heads/main/assets/snmp_modbus_gateway_snmpget_netmask_response_example.png)
-
-Confirm that the returned response shows `SUCCESS`.
-
-<a id="51024-set-the-gateway-address"></a>
-##### 5.10.2.4 Set the Gateway Address [↑](#bookmarks "Back to Bookmarks")
-
-Set the gateway address:
-
-```bash
-snmpset -v2c -c private 192.168.1.40 1.3.6.1.4.1.20738.45.46.1.65504.0 s 192.168.1.1
-```
-
-![Linux terminal, SNMP set NET_GATEWAY](https://raw.githubusercontent.com/imcase/Im_appblocks_snmp_modbus_gateway_assets/refs/heads/main/assets/snmp_modbus_gateway_snmpset_netgateway_example.png)
-
-Immediately verify the response:
-
-```bash
-snmpget -v2c -c public 192.168.1.40 1.3.6.1.4.1.20738.45.46.1.65534.0
-```
-
-![Linux terminal, SNMP response after setting NET_GATEWAY](https://raw.githubusercontent.com/imcase/Im_appblocks_snmp_modbus_gateway_assets/refs/heads/main/assets/snmp_modbus_gateway_snmpget_netgateway_response_example.png)
-
-Confirm that the returned response shows `SUCCESS`.
-
-<a id="5103-verify-written-settings-via-snmpget"></a>
-#### 5.10.3 Verify Written Settings via SNMPGET [↑](#bookmarks "Back to Bookmarks")
-
-To verify that the settings have changed correctly, use the following commands:
-
-```bash
-snmpget -v2c -c public 192.168.1.40 1.3.6.1.4.1.20738.45.46.1.65503.0
-snmpget -v2c -c public 192.168.1.40 1.3.6.1.4.1.20738.45.46.1.65505.0
-snmpget -v2c -c public 192.168.1.40 1.3.6.1.4.1.20738.45.46.1.65506.0
-snmpget -v2c -c public 192.168.1.40 1.3.6.1.4.1.20738.45.46.1.65504.0
-```
-
-> The current IP address `192.168.1.40` is used because the new address does
-> **not** take effect until the device restarts.
-
-The results of the above commands are shown here:
-
-![Linux terminal, SNMP get network settings](https://raw.githubusercontent.com/imcase/Im_appblocks_snmp_modbus_gateway_assets/refs/heads/main/assets/snmp_modbus_gateway_snmpget_network_example.png)
-
-> The settings are stored but are not active until the device restarts.
-
-<a id="5104-verify-written-settings-in-the-device-console"></a>
-#### 5.10.4 Verify Written Settings in the Device Console [↑](#bookmarks "Back to Bookmarks")
-
-In the Device Console:
-
-1. Select **Settings**.
-2. Open the **Network** tab.
-3. Click **Refresh** to load the stored settings.
-4. Confirm that Ethernet DHCP is **Disabled** and that the Ethernet IP,
-   Netmask, and Gateway fields show the values written in
-   [5.10.2](#5102-write-network-settings-using-snmp).
-
-![Device Console Settings, Network settings written via SNMP](https://raw.githubusercontent.com/imcase/Im_appblocks_snmp_modbus_gateway_assets/refs/heads/main/assets/snmp_modbus_gateway_webconsole_settings_network_example.png)
-
-> The settings are stored but are not active until the device restarts.
-
-<a id="5105-reboot-device-via-snmp"></a>
-#### 5.10.5 Reboot Device via SNMP [↑](#bookmarks "Back to Bookmarks")
-
-To apply the changed settings, send two reboot signals within 10 seconds. The
-reboot setting is `SYS_REBOOT_DEVICE`, with OID column `65520`.
-
-![Device Console Database, SYS_REBOOT_DEVICE setting](https://raw.githubusercontent.com/imcase/Im_appblocks_snmp_modbus_gateway_assets/refs/heads/main/assets/snmp_modbus_gateway_webconsole_database_table_settings_system_reboot.png)
-
-<a id="51051-send-1st-reboot-signal"></a>
-##### 5.10.5.1 Send 1st Reboot Signal [↑](#bookmarks "Back to Bookmarks")
-
-Send the first reboot signal:
-
-```bash
-snmpset -v2c -c private 192.168.1.40 1.3.6.1.4.1.20738.45.46.1.65520.0 s true
-```
-
-![Linux terminal, SNMP set first reboot signal](https://raw.githubusercontent.com/imcase/Im_appblocks_snmp_modbus_gateway_assets/refs/heads/main/assets/snmp_modbus_gateway_snmpset_reboot_device_example.png)
-
-> The device does not reboot after this first signal. It starts a 10-second
-> confirmation window for the second signal.
-
-<a id="51052-verify-1st-reboot-signal"></a>
-##### 5.10.5.2 Verify 1st Reboot Signal [↑](#bookmarks "Back to Bookmarks")
-
-Immediately check the response and reboot setting:
-
-```bash
-snmpget -v2c -c public 192.168.1.40 1.3.6.1.4.1.20738.45.46.1.65534.0
-snmpget -v2c -c public 192.168.1.40 1.3.6.1.4.1.20738.45.46.1.65520.0
-```
-
-Confirm that the response OID column `65534` reports `SUCCESS`, and that
-`SYS_REBOOT_DEVICE` (OID column `65520`) reports `true (1/2)`.
-
-![Linux terminal, SNMP get first reboot signal response](https://raw.githubusercontent.com/imcase/Im_appblocks_snmp_modbus_gateway_assets/refs/heads/main/assets/snmp_modbus_gateway_snmpget_reboot_device_example.png)
-
-<a id="51053-send-2nd-reboot-signal-within-10-seconds"></a>
-##### 5.10.5.3 Send 2nd Reboot Signal within 10 Seconds [↑](#bookmarks "Back to Bookmarks")
-
-Within 10 seconds of the first signal, send the same command again:
-
-```bash
-snmpset -v2c -c private 192.168.1.40 1.3.6.1.4.1.20738.45.46.1.65520.0 s true
-```
-
-> **NOTE:**
-> - The device now restarts and can stop responding before an SNMP response is received. 
-> - Allow it to come back online before connecting to its new IP address.
-
-<!-- TODO: Add a terminal screenshot of the second reboot `snmpset` command
-     and the resulting connection loss or reboot. -->
-
-
+Use the MQTTX Web Client to verify that the broker receives the published register values. Detailed connection and subscription steps will be added later.
 
 <br><br>
 
---- 
-
 <a id="6-commissioning-checklist"></a>
 ## 6. Commissioning checklist [↑](#bookmarks "Back to Bookmarks")
+
+<!-- TODO: Review and update this checklist for the Modbus MQTT Gateway. -->
 
 1. Install and check the RS-485 wiring.
 2. Connect the Ethernet cable and power adapter. Wait for the device to boot.
@@ -871,6 +417,8 @@ snmpset -v2c -c private 192.168.1.40 1.3.6.1.4.1.20738.45.46.1.65520.0 s true
 
 <a id="7-troubleshooting"></a>
 ## 7. Troubleshooting [↑](#bookmarks "Back to Bookmarks")
+
+<!-- TODO: Review and update these troubleshooting entries for the Modbus MQTT Gateway. -->
 
 | Symptom | Checks |
 | --- | --- |
