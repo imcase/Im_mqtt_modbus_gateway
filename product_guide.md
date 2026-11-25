@@ -13,19 +13,15 @@
 - [1. Overview](#1-overview)
 - [2. Hardware](#2-hardware)
 - [3. Network configuration and services](#3-network-configuration-and-services)
-- [4. Device Console](#4-device-console)
-  - [4.1 Database](#41-database)
-  - [Column reference](#column-reference)
+- [4. Modbus MQTT Gateway Console](#4-device-console)
+  - [4.1 Home](#41-home)
   - [4.2 Settings](#42-settings)
-    - [4.2.1 Info](#421-info)
-    - [4.2.2 Config](#422-config)
-    - [4.2.3 Network](#423-network)
-    - [4.2.4 SNMP](#424-snmp)
-    - [4.2.4.1 Scalar Instance Object-ID](#4241-scalar-instance-object-id)
-  - [4.3 Log](#43-log)
-  - [4.4 System](#44-system)
-    - [4.4.1 Reboot Device](#441-reboot-device)
-    - [4.4.2 Initialize Settings](#442-initialize-settings)
+  - [4.3 Database](#43-database)
+  - [Column reference](#column-reference)
+  - [4.4 Log](#44-log)
+  - [4.5 System](#45-system)
+    - [4.5.1 Reboot Device](#451-reboot-device)
+    - [4.5.2 Initialize Settings](#452-initialize-settings)
 - [5. Deployment Example](#5-deployment-example)
   - [5.1 Connect the Modbus BP#02 to the Gateway](#51-connect-the-modbus-bp02-to-the-gateway)
   - [5.2 Connect the Network Cable and Power Adapter](#52-connect-the-network-cable-and-power-adapter)
@@ -33,27 +29,19 @@
   - [5.4 Configure Settings](#54-configure-settings)
     - [5.4.1 Polling Interval](#541-polling-interval)
     - [5.4.2 Network](#542-network)
-    - [5.4.3 SNMP](#543-snmp)
   - [5.5 Configure Modbus Mapping](#55-configure-modbus-mapping-in-table_devices_input)
   - [5.6 Restart Device](#56-restart-device)
   - [5.7 Verify Modbus Polled Data in `TABLE_DEVICES_OUTPUT`](#57-verify-modbus-polled-data-in-table_devices_output)
-  - [5.8 Verify Modbus Polled Data via SNMP](#58-verify-modbus-polled-data-via-snmp)
   - [5.9 Write Data to Modbus](#59-write-data-to-modbus)
     - [5.9.1 Read Current Value](#591-read-current-value)
     - [5.9.2 Write New Value](#592-write-new-value)
-    - [5.9.3 Verify SNMP Write Response](#593-verify-snmp-write-response)
-    - [5.9.4 Verify Written Data via SNMPGET](#594-verify-written-data-via-snmpget)
     - [5.9.5 Verify Written Data in the Device Console](#595-verify-written-data-in-the-device-console)
-  - [5.10 Change Settings via SNMP](#510-change-settings-via-snmp)
     - [5.10.1 Review the Setting in `TABLE_SETTINGS`](#5101-review-the-setting-in-table_settings)
-    - [5.10.2 Write Network Settings Using SNMP](#5102-write-network-settings-using-snmp)
       - [5.10.2.1 Disable DHCP](#51021-disable-dhcp)
       - [5.10.2.2 Set the IP Address](#51022-set-the-ip-address)
       - [5.10.2.3 Set the Subnet Mask](#51023-set-the-subnet-mask)
       - [5.10.2.4 Set the Gateway Address](#51024-set-the-gateway-address)
-    - [5.10.3 Verify Written Settings via SNMPGET](#5103-verify-written-settings-via-snmpget)
     - [5.10.4 Verify Written Settings in the Device Console](#5104-verify-written-settings-in-the-device-console)
-    - [5.10.5 Reboot Device via SNMP](#5105-reboot-device-via-snmp)
       - [5.10.5.1 Send 1st Reboot Signal](#51051-send-1st-reboot-signal)
       - [5.10.5.2 Verify 1st Reboot Signal](#51052-verify-1st-reboot-signal)
       - [5.10.5.3 Send 2nd Reboot Signal within 10 Seconds](#51053-send-2nd-reboot-signal-within-10-seconds)
@@ -113,7 +101,6 @@ build.
 | Ethernet | static IP/netmask/gateway, or DHCP  |
 | Wi-Fi (optional) | Station mode; DHCP or static IP/netmask/gateway; configure the SSID, security type, and password |
 | Cellular (optional) | Configure the carrier's Access Point Name (APN) and SIM Card Pin in the Cellular settings |
-| SNMP | SNMPv2c and SNMPv3 agent, port 161, configurable read/write communities and SNMPv3 security credentials |
 | Time sync | SNTP against 216.239.35.0 (time.google.com), applied with the configured time zone |
 | `Modbus MQTT Gateway Console` | HTTP, port 80, 3 concurrent connections |
 
@@ -138,7 +125,7 @@ build.
 
 
 > **NOTE:** A **network connection** is required for communication between the device
-> and its configured SNTP servers, as well as authorized SNMP managers.
+> and its configured SNTP servers and MQTT broker.
 
 
 <br><br>
@@ -146,70 +133,30 @@ build.
 ---
 
 <a id="4-device-console"></a>
-## 4. Device Console [↑](#bookmarks "Back to Bookmarks")
+## 4. Modbus MQTT Gateway Console [↑](#bookmarks "Back to Bookmarks")
 
-> The browser-based configuration interface is called the **Device Console**. It
-> may also be referred to as the Web Console in AppBlocks documentation.
-
-<br>
-
-<a id="41-database"></a>
-### 4.1 Database [↑](#bookmarks "Back to Bookmarks")
-
-For every value you want to monitor, configure the gateway with the relevant Modbus device and register.
-The gateway reads that register at the **configured polling interval** and makes the latest value available to
-your SNMP monitoring system.
-
-| Table | Storage | Entries | User-defined | After reboot | Purpose |
-| --- | --- | --- | --- | --- | --- |
-| `TABLE_DEVICES_INPUT` | Flash | Max. 30 | Yes | Retained | Modbus-to-SNMP mappings |
-| `TABLE_DEVICES_OUTPUT` | RAM | Max. 30 | No | Rebuilt | Latest polling results |
-| `TABLE_SETTINGS` | RAM | 22 predefined | No | Recreated | Device Console settings |
+The **Modbus MQTT Gateway Console** is the gateway's browser-based interface for viewing data and configuring the device. Open `http://<device-ip>` in a supported web browser.
 
 <br>
+
+<a id="41-home"></a>
+### 4.1 Home [↑](#bookmarks "Back to Bookmarks")
+
+On the **Home** page, general gateway information is displayed.
+
+![Modbus MQTT Gateway Console Home page](https://raw.githubusercontent.com/imcase/Im_mqtt_modbus_gateway/refs/heads/main/assets/mqtt_modbus_gateway_home.png)
 
 > **NOTE:**
-> - Use `TABLE_DEVICES_INPUT` to define which Modbus values the gateway monitors.
-> - `TABLE_DEVICES_OUTPUT` shows the latest polling results. It is not saved and is rebuilt after each restart.
-> - `TABLE_SETTINGS` contains the settings used by the Device Console.
-> - **Restart the device after changing `TABLE_DEVICES_INPUT` or a Setting**. Changes are saved immediately but take
->   effect only after restart.
-
-<br>
-
-<a id="column-reference"></a>
-### Column reference [↑](#bookmarks "Back to Bookmarks")
-
-The following table explains the columns shown in the Device Console database
-tables.
-
-| Column | Used by table | Meaning |
-| --- | --- | --- |
-| `NAME` | Input, Output, Settings | A descriptive name for the mapping or setting. |
-| `DEVICE_ID` | Input, Output | The Modbus address of the field device. |
-| `REG_ADDR` | Input, Output | The Modbus register address to read or write. |
-| `FUNC_CODE` | Input | The Modbus function code used to access the register. |
-| `OID_COLUMN` | Input, Output, Settings | The identifier used to associate the entry with its SNMP object. |
-| `HASH_ID` | Output | An internal unique identifier for the polling result. |
-| `VALUE` | Output | The latest value read from the Modbus device. |
-| `INFO` | Settings | Additional information describing the Device Console setting. |
-
-<br>
-
-> **NOTE:**
-> - **Register addressing and value interpretation:**
-> Enter the register address (REG_ADDR) exactly as shown in the connected Modbus device's
-> register map.
-> - **Warning:** If the register address (REG_ADDR) is incorrect, the gateway may not receive a result
-> when polling the Modbus device.
+> - Select **Refresh** to update the displayed information.
+> - Use **Change** to adjust the displayed device time settings when required.
 
 <br>
 
 <a id="42-settings"></a>
 ### 4.2 Settings [↑](#bookmarks "Back to Bookmarks")
 
-Use the Settings area to review device information and configure polling,
-network, and SNMP access. 
+Use the Settings area to configure the gateway's network, Modbus polling, and
+MQTT connection.
 
 > **Reminder:**
 > - Restart the device after changing a setting.
@@ -218,9 +165,9 @@ network, and SNMP access.
 <a id="421-info"></a>
 #### 4.2.1 Info [↑](#bookmarks "Back to Bookmarks")
 
-The `Info` group displays the current and maximum number of `TABLE_DEVICES_INPUT` records.
+The `Info` group displays gateway information and configured table counts.
 
-![Device Console Settings, Info group](https://raw.githubusercontent.com/imcase/Im_appblocks_snmp_modbus_gateway_assets/refs/heads/main/assets/snmp_modbus_gateway_webconsole_settings_info_rev2.png)
+![Modbus MQTT Gateway Console Settings, Info group](https://raw.githubusercontent.com/imcase/Im_appblocks_snmp_modbus_gateway_assets/refs/heads/main/assets/snmp_modbus_gateway_webconsole_settings_info_rev2.png)
 
 <a id="422-config"></a>
 #### 4.2.2 Config [↑](#bookmarks "Back to Bookmarks")
@@ -229,7 +176,7 @@ Use the `Config` group to set the **Polling Interval** and **Debugprint**.
 
 > **NOTE:** The supported `Polling Interval` range is 0.1 to 60 seconds.
 
-![Device Console Settings, Config group](https://raw.githubusercontent.com/imcase/Im_appblocks_snmp_modbus_gateway_assets/refs/heads/main/assets/snmp_modbus_gateway_webconsole_settings_config.png)
+![Modbus MQTT Gateway Console Settings, Config group](https://raw.githubusercontent.com/imcase/Im_appblocks_snmp_modbus_gateway_assets/refs/heads/main/assets/snmp_modbus_gateway_webconsole_settings_config.png)
 
 <a id="423-network"></a>
 #### 4.2.3 Network [↑](#bookmarks "Back to Bookmarks")
@@ -239,49 +186,43 @@ address, netmask, and gateway.
 
 > **NOTE:**
 > - When DHCP is enabled, the static Ethernet address fields are **Unavailable**.
-> - DHCP may assign a different IP address and interrupt your Device Console connection.
+> - DHCP may assign a different IP address and interrupt your Modbus MQTT Gateway Console connection.
 > - To keep the device reachable at a known address, a **static** IP address is recommended.
 
-![Device Console Settings, Network group](https://raw.githubusercontent.com/imcase/Im_appblocks_snmp_modbus_gateway_assets/refs/heads/main/assets/snmp_modbus_gateway_webconsole_settings_network.png)
+![Modbus MQTT Gateway Console Settings, Network group](https://raw.githubusercontent.com/imcase/Im_appblocks_snmp_modbus_gateway_assets/refs/heads/main/assets/snmp_modbus_gateway_webconsole_settings_network.png)
 
-<a id="424-snmp"></a>
-#### 4.2.4 SNMP [↑](#bookmarks "Back to Bookmarks")
+<a id="43-database"></a>
+### 4.3 Database [↑](#bookmarks "Back to Bookmarks")
 
-Use the `SNMP` group to configure how your monitoring system connects to the gateway.
-You can set the SNMP port, read and write community strings, device description, system object ID, and SNMPv3 user and security settings.
+For each Modbus value to monitor, configure the relevant device and register.
+The gateway polls the configured points and publishes their values to the MQTT
+broker.
 
-![Device Console Settings, SNMP basic settings](https://raw.githubusercontent.com/imcase/Im_appblocks_snmp_modbus_gateway_assets/refs/heads/main/assets/snmp_modbus_gateway_webconsole_settings_snmp_basic_settings.png)
-
-> **NOTE:**
-> - **Read:** Use SNMP monitoring software to read gateway values with `snmpget` or `snmpwalk`.
-> - **Write:** Authorized SNMP clients can configure **ALL** gateway SNMP objects with `snmpset`.
-> - For SNMPv2c, an empty write community disables `snmpset` requests.
-
-<br>
-
-![Device Console Settings, SNMPv3 security settings](https://raw.githubusercontent.com/imcase/Im_appblocks_snmp_modbus_gateway_assets/refs/heads/main/assets/snmp_modbus_gateway_webconsole_settings_snmp_security_settings.png)
-
-<a id="4241-scalar-instance-object-id"></a>
-#### 4.2.4.1 Scalar Instance Object-ID [↑](#bookmarks "Back to Bookmarks")
-
-Each mapped gateway value is available through a **full SNMP OID**.
-Its composition is:
-
-```text
-<SysObjectID>.1.<OID_COLUMN>.0
-```
-
-> **NOTE:**
-> - By default, `sysObjectID` is set to `1.3.6.1.4.1.20738`.
-> - The `sysObjectID` may be extended with a child OID, such as `45.46`, to create `1.3.6.1.4.1.20738.45.46`.
-> - The final `.0` is required when querying an individual value.
-> - Each `OID_COLUMN` value must be **UNIQUE**.
-> - To minimize mistakes, use the full OID returned by `snmpwalk`.
+| Table | Purpose |
+| --- | --- |
+| `DEVICES` | User-configured Modbus device and register mappings |
+| `REGISTER_VALUE` | Latest values read from the configured registers |
+| `LOG` | Device event log |
+| `MODBUS_VALUES_LOG` | Timestamped Modbus values |
+| `MQTT_OUTBOX` | QoS 1 and QoS 2 MQTT messages awaiting broker acknowledgement |
 
 <br>
 
-<a id="43-log"></a>
-### 4.3 Log [↑](#bookmarks "Back to Bookmarks")
+<a id="column-reference"></a>
+### Column reference [↑](#bookmarks "Back to Bookmarks")
+
+The `DEVICES` table configures the Modbus points polled by the gateway.
+Its fields include the Modbus device ID, register address, function code,
+multiplier, and register name.
+
+> **NOTE:** Enter each register address as shown in the connected Modbus
+> device's register map. An incorrect address may prevent a valid polling
+> result.
+
+<br>
+
+<a id="44-log"></a>
+### 4.4 Log [↑](#bookmarks "Back to Bookmarks")
 
 Use the **Log** area to review boot and reboot events. Its reboot-reason code
 identifies why the device most recently booted or restarted.
@@ -296,28 +237,28 @@ identifies why the device most recently booted or restarted.
 | `5` | `BOOT_REBOOT_WATCHDOG_WQ_HIGH` | The watchdog timer expired while the high-priority work queue was active. |
 | `6` | `BOOT_REBOOT_WATCHDOG_WQ_MID` | The watchdog timer expired while the medium-priority work queue was active. |
 | `7` | `BOOT_REBOOT_WATCHDOG_WQ_LOW` | The watchdog timer expired while the low-priority work queue was active. |
-| `8` | `BOOT_REBOOT_COMMAND` | A reboot was requested by a UDP command, the Device Console, or the cloud. |
-| `9` | `BOOT_REBOOT_FW_UPDATE` | The device restarted while updating firmware from the Device Console or cloud. |
+| `8` | `BOOT_REBOOT_COMMAND` | A reboot was requested by a UDP command, the Modbus MQTT Gateway Console, or the cloud. |
+| `9` | `BOOT_REBOOT_FW_UPDATE` | The device restarted while updating firmware from the Modbus MQTT Gateway Console or cloud. |
 
-![Device Console, Log area](https://raw.githubusercontent.com/imcase/Im_appblocks_snmp_modbus_gateway_assets/refs/heads/main/assets/snmp_modbus_gateway_webconsole_log.png)
+![Modbus MQTT Gateway Console, Log area](https://raw.githubusercontent.com/imcase/Im_appblocks_snmp_modbus_gateway_assets/refs/heads/main/assets/snmp_modbus_gateway_webconsole_log.png)
 
 <br>
 
-<a id="44-system"></a>
-### 4.4 System [↑](#bookmarks "Back to Bookmarks")
+<a id="45-system"></a>
+### 4.5 System [↑](#bookmarks "Back to Bookmarks")
 
 The `System` area lets you restart the device or restore its default settings.
 
 <a id="441-reboot-device"></a>
-#### 4.4.1 Reboot Device [↑](#bookmarks "Back to Bookmarks")
+#### 4.5.1 Reboot Device [↑](#bookmarks "Back to Bookmarks")
 
 Click **Reboot Device** to restart the device.
 
-> Restart the device after changing `TABLE_DEVICES_INPUT` or Device Console
+> Restart the device after changing gateway settings or Device Console
 > settings to apply the new configuration.
 
 <a id="442-initialize-settings"></a>
-#### 4.4.2 Initialize Settings [↑](#bookmarks "Back to Bookmarks")
+#### 4.5.2 Initialize Settings [↑](#bookmarks "Back to Bookmarks")
 
 Click **Initialize Settings** to restore the device's default configuration.
 
@@ -333,7 +274,7 @@ Click **Initialize Settings** to restore the device's default configuration.
 
 <br>
 
-![Device Console, System area](https://raw.githubusercontent.com/imcase/Im_appblocks_snmp_modbus_gateway_assets/refs/heads/main/assets/snmp_modbus_gateway_webconsole_settings_system.png)
+![Modbus MQTT Gateway Console, System area](https://raw.githubusercontent.com/imcase/Im_appblocks_snmp_modbus_gateway_assets/refs/heads/main/assets/snmp_modbus_gateway_webconsole_settings_system.png)
 
 
 <br><br>
