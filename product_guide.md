@@ -89,6 +89,8 @@ build.
 | Controller | Tibbo TPP2W(G3) Tibbo Project PCB |
 | Enclosure | TPB2, DIN-rail mounting kit, vibration-proof kit |
 | Network | On-board 10/100 Base-T Ethernet with RJ45 |
+| Wi-Fi **(Optional)** | Requires the Wi-Fi module |
+| Cellular **(Optional)** | Requires the cellular modem module and antenna |
 | Field interface | Tibbit #45 RS-485 interface for Modbus RTU, installed in socket 9 |
 | Field connector | Tibbit #21 (4-terminal block), installed in socket 2 |
 | Power | Tibbit #10 power supply module in socket 11 |
@@ -109,18 +111,35 @@ build.
 | Item | Setting |
 | --- | --- |
 | Ethernet | static IP/netmask/gateway, or DHCP  |
+| Wi-Fi (optional) | Station mode; DHCP or static IP/netmask/gateway; configure the SSID, security type, and password |
+| Cellular (optional) | Configure the carrier's Access Point Name (APN) and SIM Card Pin in the Cellular settings |
 | SNMP | SNMPv2c and SNMPv3 agent, port 161, configurable read/write communities and SNMPv3 security credentials |
 | Time sync | SNTP against 216.239.35.0 (time.google.com), applied with the configured time zone |
-| Device Console | HTTP, port 80, 3 concurrent connections |
+| `Modbus MQTT Gateway Console` | HTTP, port 80, 3 concurrent connections |
 
 <br>
 
-> **NOTE:**
-> - Out of the box, the device uses the **default** static IP address
-> `192.168.1.40`. This placeholder makes the device reachable on first
-> power-up; change it to match your network.
-> - A **network connection** is required for communication between the device
+> **Ethernet:**
+> - Out of the box, Ethernet DHCP is **disabled** and the device uses the
+>   **default** static IP address `192.168.1.40`. This placeholder makes the
+>   device reachable on first power-up; change it to match your network.
+> - When Ethernet DHCP is enabled, use the address assigned by your DHCP server
+>   instead.
+
+> **Wi-Fi:**
+> - Wi-Fi is enabled in **Station** mode with DHCP enabled, but is not
+>   configured to join a network until you enter its SSID and password.
+
+> **Cellular:**
+> - For optional cellular, enter the carrier's APN and the SIM Card Pin in the
+>   Cellular settings.
+> - Cellular connectivity requires an installed modem, an active SIM, and
+>   compatible coverage.
+
+
+> **NOTE:** A **network connection** is required for communication between the device
 > and its configured SNTP servers, as well as authorized SNMP managers.
+
 
 <br><br>
 
