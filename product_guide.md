@@ -192,14 +192,24 @@ static IP address, netmask, and gateway.
 <a id="423-modbus"></a>
 #### 4.2.3 Modbus [↑](#bookmarks "Back to Bookmarks")
 
-Use **Modbus** to configure the serial baud rate, parity, data bits, and poll
-interval for the Modbus connection.
+In the **Modbus** tab, you can configure Tibbit 05’s baud rate, parity, data
+bits, and poll interval.
+
+> **NOTE:** Make sure the baud rate matches your Modbus device; otherwise, the
+> gateway cannot poll its data.
+
+![Modbus MQTT Gateway Console Settings, Modbus tab](https://raw.githubusercontent.com/imcase/Im_mqtt_modbus_gateway/refs/heads/main/assets/mqtt_modbus_gateway_settings_modbus.png)
 
 <a id="424-mqtt"></a>
 #### 4.2.4 MQTT [↑](#bookmarks "Back to Bookmarks")
 
-Use **MQTT** to configure the broker address and port, TLS, client identity
-and credentials, publish topic prefix, publish interval, and certificate files.
+Configure the gateway’s connection to the MQTT broker in the **MQTT** tab.
+
+> **NOTE:**
+> - `MQTT TLS Certificate File Path` is for the certificate provided by the MQTT broker.
+> - `MQTT Client Certificate File Path` is for the gateway's client certificate.
+
+![Modbus MQTT Gateway Console Settings, MQTT tab](https://raw.githubusercontent.com/imcase/Im_mqtt_modbus_gateway/refs/heads/main/assets/mqtt_modbus_gateway_settings_mqtt.png)
 
 <a id="425-wi-fi"></a>
 #### 4.2.5 Wi-Fi [↑](#bookmarks "Back to Bookmarks")
