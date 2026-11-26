@@ -214,14 +214,24 @@ Configure the gateway’s connection to the MQTT broker in the **MQTT** tab.
 <a id="425-wi-fi"></a>
 #### 4.2.5 Wi-Fi [↑](#bookmarks "Back to Bookmarks")
 
-For Wi-Fi configurations, set the access point SSID, security type, password,
-and DHCP or static IP settings.
+Wi-Fi is optional on the `TCP Modbus Gateway`. To connect to a wireless
+network, enter its SSID, security type, and password.
+
+> **NOTE:**
+> DHCP can be used, or a static IP address, netmask, and gateway can be configured.
+
+![Modbus MQTT Gateway Console Settings, Wi-Fi tab](https://raw.githubusercontent.com/imcase/Im_mqtt_modbus_gateway/refs/heads/main/assets/mqtt_modbus_gateway_settings_wifi.png)
 
 <a id="426-cellular"></a>
 #### 4.2.6 Cellular [↑](#bookmarks "Back to Bookmarks")
 
-For cellular configurations, enter the carrier's Access Point Name (APN) and
-SIM Card Pin.
+Cellular is also optional on the `TCP Modbus Gateway`. To enable PPP access,
+enter your carrier’s `Access Point Name` and the `SIM Card Pin` for your SIM.
+
+> **NOTE:** If your SIM card does not require a PIN, leave `SIM Card Pin` at
+> its default value: `?`.
+
+![Modbus MQTT Gateway Console Settings, Cellular tab](https://raw.githubusercontent.com/imcase/Im_mqtt_modbus_gateway/refs/heads/main/assets/mqtt_modbus_gateway_settings_cellular.png)
 
 <a id="43-database"></a>
 ### 4.3 Database [↑](#bookmarks "Back to Bookmarks")
