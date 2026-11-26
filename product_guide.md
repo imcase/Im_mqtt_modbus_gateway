@@ -136,28 +136,30 @@ build.
 <a id="4-device-console"></a>
 ## 4. Modbus MQTT Gateway Console [↑](#bookmarks "Back to Bookmarks")
 
-The **Modbus MQTT Gateway Console** is the gateway's browser-based interface for viewing data and configuring the device. Open `http://<device-ip>` in a supported web browser.
+The **Modbus MQTT Gateway Console** is the gateway's browser-based interface
+for viewing data and configuring the device. To open it, enter
+`http://<device-ip>` in your web browser.
 
 <br>
 
 <a id="41-home"></a>
 ### 4.1 Home [↑](#bookmarks "Back to Bookmarks")
 
-On the **Home** page, general gateway information is displayed.
+The **Home** page gives you an overview of the gateway.
 
 ![Modbus MQTT Gateway Console Home page](https://raw.githubusercontent.com/imcase/Im_mqtt_modbus_gateway/refs/heads/main/assets/mqtt_modbus_gateway_home.png)
 
 > **NOTE:**
-> - Select **Refresh** to update the displayed information.
-> - Use **Change** to adjust the displayed device time settings when required.
+> - Select **Refresh** to update the information.
+> - Select **Change** to adjust the device time settings if needed.
 
 <br>
 
 <a id="42-settings"></a>
 ### 4.2 Settings [↑](#bookmarks "Back to Bookmarks")
 
-Use the Settings area to configure the gateway's network, Modbus polling, and
-MQTT connection.
+The **Settings** page groups configuration options into tabs for the network,
+Modbus polling, and MQTT connection.
 
 > **Reminder:**
 > - Restart the device after changing a setting.
@@ -166,7 +168,10 @@ MQTT connection.
 <a id="421-general"></a>
 #### 4.2.1 General [↑](#bookmarks "Back to Bookmarks")
 
-The **General** tab contains the Web Admin Password and Device Time Zone settings, which are configurable.
+Start with the **General** tab to configure the `Web Admin Password` and
+`Device Time Zone`.
+
+> **NOTE:** When you log in, use `Web Admin Username = admin`.
 
 ![Modbus MQTT Gateway Console Settings, General tab](https://raw.githubusercontent.com/imcase/Im_mqtt_modbus_gateway/refs/heads/main/assets/mqtt_modbus_gateway_settings_general.png)
 
@@ -174,8 +179,15 @@ The **General** tab contains the Web Admin Password and Device Time Zone setting
 <a id="422-network"></a>
 #### 4.2.2 Network [↑](#bookmarks "Back to Bookmarks")
 
-Use **Network** to enable or disable Ethernet DHCP and configure the Ethernet
-IP address, netmask, and gateway.
+For Ethernet, the **Network** tab gives you two options: use DHCP, or enter a
+static IP address, netmask, and gateway.
+
+![Modbus MQTT Gateway Console Settings, Network tab](https://raw.githubusercontent.com/imcase/Im_mqtt_modbus_gateway/refs/heads/main/assets/mqtt_modbus_gateway_settings_network.png)
+
+> **NOTE:**
+> - DHCP may assign a different IP address and interrupt your connection to the console.
+> - If you want the device to remain reachable at a known address, use a **static** IP address.
+
 
 <a id="423-modbus"></a>
 #### 4.2.3 Modbus [↑](#bookmarks "Back to Bookmarks")
