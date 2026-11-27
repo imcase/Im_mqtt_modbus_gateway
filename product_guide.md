@@ -27,6 +27,10 @@
     - [4.3.2 REGISTER_VALUE](#432-register_value)
     - [4.3.3 Column Reference](#column-reference)
   - [4.4 Log](#44-log)
+    - [4.4.1 LOG](#441-log)
+      - [4.4.1.1 Reboot-code](#4411-reboot-code)
+    - [4.4.2 MODBUS_VALUES_LOG](#442-modbus_values_log)
+    - [4.4.3 MQTT_OUTBOX](#443-mqtt_outbox)
   - [4.5 System](#45-system)
     - [4.5.1 Reboot Device](#451-reboot-device)
     - [4.5.2 Initialize Settings](#452-initialize-settings)
@@ -263,8 +267,7 @@ register.
 <a id="column-reference"></a>
 #### 4.3.3 Column Reference [↑](#bookmarks "Back to Bookmarks")
 
-The following table explains the columns shown in the `DEVICES` and
-`REGISTER_VALUE` tabs.
+Use the table below to understand the columns in the `DEVICES` and `REGISTER_VALUE` tabs.
 
 | Column | Used by table | Meaning |
 | --- | --- | --- |
@@ -286,10 +289,23 @@ The following table explains the columns shown in the `DEVICES` and
 <a id="44-log"></a>
 ### 4.4 Log [↑](#bookmarks "Back to Bookmarks")
 
-Use the **Log** area to review boot and reboot events. Its reboot-reason code
-identifies why the device most recently booted or restarted.
+On the **Log** page, you will find three tabs: `LOG`, `MODBUS_VALUES_LOG`, and `MQTT_OUTBOX`.
 
-| Reboot-reason code | Reason | Description |
+<a id="441-log"></a>
+#### 4.4.1 LOG [↑](#bookmarks "Back to Bookmarks")
+
+Check the `LOG` tab for the timestamp and `Reboot-code` associated with each
+device boot or reboot.
+
+![Modbus MQTT Gateway Console Log, LOG tab](https://raw.githubusercontent.com/imcase/Im_mqtt_modbus_gateway/refs/heads/main/assets/mqtt_modbus_gateway_log_log.png)
+
+
+<a id="4411-reboot-code"></a>
+#### 4.4.1.1 Reboot-code [↑](#bookmarks "Back to Bookmarks")
+
+Find each code's reason and description in the table below.
+
+| Reboot-code | Reason | Description |
 | --- | --- | --- |
 | `0` | `BOOT_REBOOT_NONE` | No reboot reason is recorded. |
 | `1` | `BOOT_REBOOT_HARDWARE` | Hardware or external reset. This is informational. |
@@ -302,7 +318,25 @@ identifies why the device most recently booted or restarted.
 | `8` | `BOOT_REBOOT_COMMAND` | A reboot was requested by a UDP command, the Modbus MQTT Gateway Console, or the cloud. |
 | `9` | `BOOT_REBOOT_FW_UPDATE` | The device restarted while updating firmware from the Modbus MQTT Gateway Console or cloud. |
 
-![Modbus MQTT Gateway Console, Log area](https://raw.githubusercontent.com/imcase/Im_appblocks_snmp_modbus_gateway_assets/refs/heads/main/assets/snmp_modbus_gateway_webconsole_log.png)
+
+<a id="442-modbus_values_log"></a>
+#### 4.4.2 MODBUS_VALUES_LOG [↑](#bookmarks "Back to Bookmarks")
+
+Use this table to review the Modbus values the gateway has successfully polled, along with each value’s register name and timestamp.
+
+![Modbus MQTT Gateway Console Log, MODBUS_VALUES_LOG tab](https://raw.githubusercontent.com/imcase/Im_mqtt_modbus_gateway/refs/heads/main/assets/mqtt_modbus_gateway_log_modbus_value_log.png)
+
+<a id="443-mqtt_outbox"></a>
+#### 4.4.3 MQTT_OUTBOX [↑](#bookmarks "Back to Bookmarks")
+
+The `MQTT_OUTBOX` tab is designed to track outgoing messages that use **broker delivery confirmation** (QoS **1** or **2**). 
+It shows when each message was recorded, where it was sent, and details used to track delivery.
+
+> **NOTE:**
+> - This tab does not show whether the gateway is connected to the broker or whether a message was received.
+> - The current firmware sends Modbus values at QoS 0, so they do not appear in this table.
+
+![Modbus MQTT Gateway Console Log, MQTT_OUTBOX tab](https://raw.githubusercontent.com/imcase/Im_mqtt_modbus_gateway/refs/heads/main/assets/mqtt_modbus_gateway_log_mqtt_outbox.png)
 
 <br>
 
