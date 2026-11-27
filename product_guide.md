@@ -23,7 +23,9 @@
     - [4.2.5 Wi-Fi](#425-wi-fi)
     - [4.2.6 Cellular](#426-cellular)
   - [4.3 Database](#43-database)
-  - [Column reference](#column-reference)
+    - [4.3.1 DEVICES](#431-devices)
+    - [4.3.2 REGISTER_VALUE](#432-register_value)
+    - [4.3.3 Column Reference](#column-reference)
   - [4.4 Log](#44-log)
   - [4.5 System](#45-system)
     - [4.5.1 Reboot Device](#451-reboot-device)
@@ -233,31 +235,49 @@ enter your carrier’s `Access Point Name` and the `SIM Card Pin` for your SIM.
 
 ![Modbus MQTT Gateway Console Settings, Cellular tab](https://raw.githubusercontent.com/imcase/Im_mqtt_modbus_gateway/refs/heads/main/assets/mqtt_modbus_gateway_settings_cellular.png)
 
+<br>
+
 <a id="43-database"></a>
 ### 4.3 Database [↑](#bookmarks "Back to Bookmarks")
 
-For each Modbus value to monitor, configure the relevant device and register.
-The gateway polls the configured points and publishes their values to the MQTT
-broker.
+For each Modbus value you want the gateway to monitor and publish, add an
+entry to the `DEVICES` tab. The gateway polls the configured registers at the
+polling interval and publishes their latest values to the MQTT broker.
 
-| Table | Purpose |
-| --- | --- |
-| `DEVICES` | User-configured Modbus device and register mappings |
-| `REGISTER_VALUE` | Latest values read from the configured registers |
-| `LOG` | Device event log |
-| `MODBUS_VALUES_LOG` | Timestamped Modbus values |
-| `MQTT_OUTBOX` | QoS 1 and QoS 2 MQTT messages awaiting broker acknowledgement |
+<a id="431-devices"></a>
+#### 4.3.1 DEVICES [↑](#bookmarks "Back to Bookmarks")
+
+The `DEVICES` tab contains the Modbus device and register mappings the gateway
+uses to poll values.
+
+![Modbus MQTT Gateway Console Database, DEVICES tab](https://raw.githubusercontent.com/imcase/Im_mqtt_modbus_gateway/refs/heads/main/assets/mqtt_modbus_gateway_database_devices.png)
+
+<a id="432-register_value"></a>
+#### 4.3.2 REGISTER_VALUE [↑](#bookmarks "Back to Bookmarks")
+
+The `REGISTER_VALUE` tab shows the latest value read for each configured
+register.
+
+![Modbus MQTT Gateway Console Database, REGISTER_VALUE tab](https://raw.githubusercontent.com/imcase/Im_mqtt_modbus_gateway/refs/heads/main/assets/mqtt_modbus_gateway_database_register_value.png)
+
+<a id="column-reference"></a>
+#### 4.3.3 Column Reference [↑](#bookmarks "Back to Bookmarks")
+
+The following table explains the columns shown in the `DEVICES` and
+`REGISTER_VALUE` tabs.
+
+| Column | Used by table | Meaning |
+| --- | --- | --- |
+| `Device ID` | `DEVICES` | Modbus address of the field device. |
+| `Address` | `DEVICES` | Modbus register address to read. |
+| `Function Code` | `DEVICES` | Modbus function used to access the register. |
+| `Multiplier` | `DEVICES` | Scale factor applied to the value read from the register. |
+| `Name (String)` | `DEVICES`, `REGISTER_VALUE` | Name used to identify the mapped Modbus value. |
+| `VALUE` | `REGISTER_VALUE` | Latest value read from the mapped register. |
 
 <br>
 
-<a id="column-reference"></a>
-### Column reference [↑](#bookmarks "Back to Bookmarks")
-
-The `DEVICES` table configures the Modbus points polled by the gateway.
-Its fields include the Modbus device ID, register address, function code,
-multiplier, and register name.
-
-> **NOTE:** Enter each register address as shown in the connected Modbus
+> **NOTE:** Enter each `Address` as shown in the connected Modbus
 > device's register map. An incorrect address may prevent a valid polling
 > result.
 
