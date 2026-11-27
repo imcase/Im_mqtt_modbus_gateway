@@ -32,8 +32,9 @@
     - [4.4.2 MODBUS_VALUES_LOG](#442-modbus_values_log)
     - [4.4.3 MQTT_OUTBOX](#443-mqtt_outbox)
   - [4.5 System](#45-system)
-    - [4.5.1 Reboot Device](#451-reboot-device)
-    - [4.5.2 Initialize Settings](#452-initialize-settings)
+    - [4.5.1 Commands](#451-commands)
+    - [4.5.2 Time](#452-time)
+    - [4.5.3 Logging](#453-logging)
 - [5. Deployment Example](#5-deployment-example)
   - [5.1 Connect the Modbus RTU devices](#51-connect-the-modbus-rtu-devices)
   - [5.2 Connect the network and power](#52-connect-the-network-and-power)
@@ -267,8 +268,6 @@ register.
 <a id="column-reference"></a>
 #### 4.3.3 Column Reference [↑](#bookmarks "Back to Bookmarks")
 
-Use the table below to understand the columns in the `DEVICES` and `REGISTER_VALUE` tabs.
-
 | Column | Used by table | Meaning |
 | --- | --- | --- |
 | `Device ID` | `DEVICES` | Modbus address of the field device. |
@@ -289,7 +288,8 @@ Use the table below to understand the columns in the `DEVICES` and `REGISTER_VAL
 <a id="44-log"></a>
 ### 4.4 Log [↑](#bookmarks "Back to Bookmarks")
 
-On the **Log** page, you will find three tabs: `LOG`, `MODBUS_VALUES_LOG`, and `MQTT_OUTBOX`.
+Use the **Log** page to review device reboot records, Modbus polling history,
+and MQTT outbox information.
 
 <a id="441-log"></a>
 #### 4.4.1 LOG [↑](#bookmarks "Back to Bookmarks")
@@ -301,7 +301,7 @@ device boot or reboot.
 
 
 <a id="4411-reboot-code"></a>
-#### 4.4.1.1 Reboot-code [↑](#bookmarks "Back to Bookmarks")
+##### 4.4.1.1 Reboot-code [↑](#bookmarks "Back to Bookmarks")
 
 Find each code's reason and description in the table below.
 
@@ -343,20 +343,16 @@ It shows when each message was recorded, where it was sent, and details used to 
 <a id="45-system"></a>
 ### 4.5 System [↑](#bookmarks "Back to Bookmarks")
 
-The `System` area lets you restart the device or restore its default settings.
+<a id="451-commands"></a>
+#### 4.5.1 Commands [↑](#bookmarks "Back to Bookmarks")
 
-<a id="441-reboot-device"></a>
-#### 4.5.1 Reboot Device [↑](#bookmarks "Back to Bookmarks")
+Let's take a look at the **Commands** tab first. It provides controls to
+restart the device or initialize its stored settings:
+- **Reboot Device:** Restarts the gateway and applies the stored settings.
+- **Initialize Settings:** Restores the application settings to their default
+  values. **A reboot is required.**
 
-Click **Reboot Device** to restart the device.
-
-> Restart the device after changing gateway settings or Device Console
-> settings to apply the new configuration.
-
-<a id="442-initialize-settings"></a>
-#### 4.5.2 Initialize Settings [↑](#bookmarks "Back to Bookmarks")
-
-Click **Initialize Settings** to restore the device's default configuration.
+<br>
 
 > **MD-button:**
 >
@@ -368,9 +364,45 @@ Click **Initialize Settings** to restore the device's default configuration.
 > **NOTE:** Restart the device after initializing settings or using the MD
 > button so that the restored settings take effect.
 
-<br>
+![Modbus MQTT Gateway Console System, Commands tab](https://raw.githubusercontent.com/imcase/Im_mqtt_modbus_gateway/refs/heads/main/assets/mqtt_modbus_gateway_system_commands.png)
 
-![Modbus MQTT Gateway Console, System area](https://raw.githubusercontent.com/imcase/Im_appblocks_snmp_modbus_gateway_assets/refs/heads/main/assets/snmp_modbus_gateway_webconsole_settings_system.png)
+<a id="452-time"></a>
+#### 4.5.2 Time [↑](#bookmarks "Back to Bookmarks")
+
+The **Time** tab shows the device time, time zone, daylight-saving status,
+and last SNTP synchronization time.
+
+The following controls are available:
+
+- **Change:** Sets the device time manually.
+- **Set to This Computer's Time:** Sets the device time from the computer
+  running the Device Console.
+- **Sync with SNTP Server:** Synchronizes the device time with the configured
+  SNTP server.
+
+> **NOTE:** If Sync with SNTP Server does not succeed, check the device’s network connection and make sure it has internet access.
+
+![Modbus MQTT Gateway Console System, Time tab](https://raw.githubusercontent.com/imcase/Im_mqtt_modbus_gateway/refs/heads/main/assets/mqtt_modbus_gateway_system_time.png)
+
+<a id="453-logging"></a>
+#### 4.5.3 Logging [↑](#bookmarks "Back to Bookmarks")
+
+In the **Logging** tab, choose one of five log levels to control how much
+information each module records while the device is running:
+
+- **Off:** No log messages are recorded.
+- **Error:** Only error messages are recorded.
+- **Warning:** Warning and error messages are recorded.
+- **Info:** Informational, warning, and error messages are recorded.
+- **Debug:** All messages, including detailed debugging information, are recorded.
+
+> **NOTE:**
+> - Use **Filter modules** to find a module.
+> - To set a level for **ALL** modules, choose one from the drop-down next to **All modules**, then select **Apply**.
+> - To set a level for **ONE** module, use the drop-down in that module's row.
+> - Log levels**reset** when the device reboots.
+
+![Modbus MQTT Gateway Console System, Logging tab](https://raw.githubusercontent.com/imcase/Im_mqtt_modbus_gateway/refs/heads/main/assets/mqtt_modbus_gateway_system_logging.png)
 
 
 <br><br>
